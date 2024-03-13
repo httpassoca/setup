@@ -1,0 +1,30 @@
+- hosts: localhost
+  become: yes
+  collections:
+    - community.general
+  tasks:
+  - name: Ensure pacman database is up to date
+    ansible.builtin.command:
+      cmd: pacman -Sy
+
+  - name: Install Zsh
+    ansible.builtin.pacman:
+      name: zsh      # Name of the package to install
+      state: present # Ensures that Zsh is installed
+
+  - name: Install oh-my-zsh
+    ansible.builtin.shell:
+      cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --noconfirm
+
+  - name: Set Zsh as default shell for the current user
+    ansible.builtin.shell:
+      cmd: echo -e "export SHELL=/bin/zsh\nexec /bin/zsh -l" > ~/.bash_profile
+
+    become: true
+  - name: Install zsh plugin for auto-completions
+    ansible.builtin.git:
+      repo: 'https://github.com/zsh-users/zsh-autosuggestions'
+      dest: "~/.oh-my-zsh/plugins/zsh-autosuggestions"
+  - name: Update .zshrc
+    shell: sed -i '' "s/(git/(git zsh-autosuggestions/g" ~/.zshrc
+
