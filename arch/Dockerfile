@@ -1,5 +1,5 @@
 # Use the latest Arch Linux base image
-FROM menci/archlinuxarm:latest
+FROM manjarolinux/base
 
 # Update the system and install necessary packages
 RUN pacman -Syu --noconfirm && \
@@ -11,13 +11,13 @@ RUN useradd -m -d /home/passoca -s /bin/bash passoca && \
     echo "passoca ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/passoca  # Allow 'passoca' to use sudo without a password
 
 # Set the working directory to /app
-WORKDIR /app
+WORKDIR /home/passoca
 
 # Copy local files into the container
 COPY . .
 
 # Change ownership of the /app directory to 'passoca'
-RUN chown -R passoca:passoca /app
+RUN chown -R passoca:passoca /home/passoca
 
 # Switch to the new user 'passoca'
 USER passoca

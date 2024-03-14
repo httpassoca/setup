@@ -1,30 +1,42 @@
 - hosts: localhost
-  become: yes
   collections:
     - community.general
   tasks:
-  - name: Ensure pacman database is up to date
-    ansible.builtin.command:
-      cmd: pacman -Sy
-
   - name: Install Zsh
-    ansible.builtin.pacman:
-      name: zsh      # Name of the package to install
-      state: present # Ensures that Zsh is installed
-
-  - name: Install oh-my-zsh
-    ansible.builtin.shell:
-      cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --noconfirm
-
-  - name: Set Zsh as default shell for the current user
-    ansible.builtin.shell:
-      cmd: echo -e "export SHELL=/bin/zsh\nexec /bin/zsh -l" > ~/.bash_profile
-
+    community.general.pacman:
+      name: zsh
+      state: present
     become: true
-  - name: Install zsh plugin for auto-completions
-    ansible.builtin.git:
-      repo: 'https://github.com/zsh-users/zsh-autosuggestions'
-      dest: "~/.oh-my-zsh/plugins/zsh-autosuggestions"
-  - name: Update .zshrc
-    shell: sed -i '' "s/(git/(git zsh-autosuggestions/g" ~/.zshrc
 
+  - name: Check if Oh My Zsh is already installed
+    stat:
+      path: "{{ ansible_env.HOME }}/.oh-my-zsh"
+    register: oh_my_zsh
+
+  - name: Install Oh My Zsh for the current user
+    shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    args:
+      creates: "{{ ansible_env.HOME }}/.oh-my-zsh"
+    when: not oh_my_zsh.stat.exists
+
+  - name: Change the default shell to Zsh
+    user:
+      name: "{{ ansible_user_id }}"
+      shell: /bin/zsh
+    become: true
+    when: not oh_my_zsh.stat.exists
+
+  - name: Install zsh-autosuggestions plugin
+    ansible.builtin.git:
+      repo: https://github.com/zsh-users/zsh-autosuggestions
+      dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+      depth: 1
+    when: not oh_my_zsh.stat.exists
+
+  - name: Update .zshrc to include zsh-autosuggestions plugin
+    lineinfile:
+      path: "{{ ansible_env.HOME }}/.zshrc"
+      regexp: '^(plugins=\()'
+      line: 'plugins=(git zsh-autosuggestions)'
+      backrefs: yes
+    when: not oh_my_zsh.stat.exists
