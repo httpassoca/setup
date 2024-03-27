@@ -1,0 +1,79 @@
+- name: Install Zsh
+  community.general.pacman:
+    name: zsh
+    state: present
+  become: true
+  tags:
+  - shell
+  
+- name: Check if Oh My Zsh is already installed
+  stat:
+    path: "{{ ansible_env.HOME }}/.oh-my-zsh"
+  register: oh_my_zsh
+  tags:
+  - shell
+
+- name: Install Oh My Zsh for the current user
+  shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  args:
+    creates: "{{ ansible_env.HOME }}/.oh-my-zsh"
+  when: not oh_my_zsh.stat.exists
+  tags:
+  - shell
+
+- name: Change the default shell to Zsh
+  user:
+    name: "{{ ansible_user_id }}"
+    shell: /bin/zsh
+  become: true
+  when: not oh_my_zsh.stat.exists
+  tags:
+  - shell
+
+- name: Install zsh-autosuggestions plugin
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    depth: 1
+  when: not oh_my_zsh.stat.exists
+  tags:
+  - shell
+
+- name: Update .zshrc to include zsh-autosuggestions plugin
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    regexp: '^(plugins=\()'
+    line: "plugins=(git zsh-autosuggestions)"
+    backrefs: yes
+  when: not oh_my_zsh.stat.exists
+  tags:
+  - shell
+
+- name: Install bat
+  community.general.pacman:
+    name: bat
+    state: present
+  become: true
+  tags:
+  - shell
+
+- name: Install zoxide
+  community.general.pacman:
+    name: zoxide
+    state: present
+  become: true
+  tags:
+  - shell
+
+- name: Add Zoxide init script to .zshrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    line: |
+      alias cd="z"
+      # Zoxide
+      eval "$(zoxide init zsh)"
+    state: present
+    create: yes
+    backup: yes
+  tags:
+  - shell

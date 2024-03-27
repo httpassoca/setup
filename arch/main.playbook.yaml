@@ -1,0 +1,18 @@
+- hosts: localhost
+  collections:
+    - community.general
+  pre_tasks:
+  - name: Update Pacman
+    become: true
+    community.general.pacman:
+      update_cache: true
+      upgrade: true
+    tags:
+      - core
+  tasks:
+  - name: Include task list shell in play
+    include_tasks: tasks/shell.playbook.yaml
+  - name: Include task list cool in play
+    include_tasks: tasks/cool.playbook.yaml
+  - name: Include task list editor in play
+    include_tasks: tasks/editor.playbook.yaml

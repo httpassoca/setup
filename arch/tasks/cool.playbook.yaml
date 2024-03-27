@@ -1,0 +1,16 @@
+- name: Install neofetch
+  community.general.pacman:
+    name: neofetch
+    state: present
+  become: true
+  tags:
+  - cool
+
+- name: Install tree
+  community.general.pacman:
+    name: tree
+    state: present
+  become: true
+  tags:
+  - cool
+
