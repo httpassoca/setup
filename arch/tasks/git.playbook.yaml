@@ -1,0 +1,21 @@
+- name: Install git
+  community.general.pacman: 
+    name: git
+    state: present
+  become: true
+  tags:
+  - git
+- name: Git personal setup email
+  git_config:
+    name: user.email
+    scope: global
+    value: "me@passoca.dev"
+  tags:
+  - git
+- name: Git personal setup name
+  git_config:
+    name: user.name
+    scope: global
+    value: "Rafael Passoca"
+  tags:
+  - git

@@ -3,7 +3,7 @@ FROM manjarolinux/base
 
 # Update the system and install necessary packages
 RUN pacman -Syu --noconfirm && \
-    pacman -S nano ansible sudo git which --noconfirm  # Added sudo here
+    pacman -S nano ansible sudo which --noconfirm  # Added sudo here
 
 # Create a new user 'passoca' with home directory and no login shell
 # Replace 'passoca' with your preferred username if necessary
@@ -24,6 +24,7 @@ USER passoca
 
 # Install the required Ansible collection for community general modules
 RUN ansible-galaxy collection install community.general
+RUN echo 'alias ans="ansible-playbook main.playbook.yaml"' >> /home/passoca/.bashrc
 
 # Set the default command to run when starting the container
 CMD ["bash"]
