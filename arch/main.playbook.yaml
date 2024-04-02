@@ -16,3 +16,5 @@
       - tasks/shell.playbook.yaml
       - tasks/cool.playbook.yaml
       - tasks/editor.playbook.yaml
+      - tasks/code.playbook.yaml
+      - tasks/brave.playbook.yaml
